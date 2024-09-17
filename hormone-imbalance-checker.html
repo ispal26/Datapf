@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hormone Imbalance Symptom Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .symptom-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .symptom-item {
+            background-color: #e9e9e9;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .symptom-item.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9e9e9;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hormone Imbalance Symptom Checker</h1>
+        <p>Select your symptoms below to check for potential hormone imbalances:</p>
+        <div id="symptomList" class="symptom-list"></div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const hormoneImbalances = {
+            "High Estrogen": ["PMS", "Heavy periods", "Water retention", "Painful periods", "Breast tenderness", "Low libido", "Irritable", "Weight gain"],
+            "Low Estrogen": ["Vaginal dryness", "Painful intercourse", "UTIs", "Headaches", "Crying easily", "Fatigue", "Weight gain", "Dry skin", "Joint pain"],
+            "High Progesterone": ["Fatigue", "Low libido", "Puffy", "Anxiety", "Breast tenderness", "Vaginal dryness", "UTIs"],
+            "Low Progesterone": ["Irregular cycles", "Heavy periods", "Low body temp", "Spotting", "Facial hair", "Painful periods", "Anxiety", "Insomnia", "Miscarriage", "Infertility", "Inflammation", "Headaches", "Pain"],
+            "High Testosterone": ["Acne", "Oily skin", "Irritable", "Aggression", "Hair growth on body", "Hair loss on scalp", "Weight gain", "Insomnia"],
+            "Low Testosterone": ["Low libido", "Decreased muscle", "Aches & pains", "Thinning hair/skin", "Weight gain", "Fatigue", "Poor focus", "Low self esteem", "Sagging skin"],
+            "High Cortisol": ["Insomnia", "Anxiety", "Weight gain", "Racing heart", "Energy at night", "Frequent sickness", "Reflux/bloating", "Muscle loss"],
+            "Low Cortisol": ["Low energy/fatigue", "Pain & inflammation", "Sleep issues", "Low blood pressure", "Low libido", "Dizziness", "Can't exercise", "Anxiety/depression"]
+        };
+
+        const symptomList = document.getElementById('symptomList');
+        const results = document.getElementById('results');
+
+        // Create a set of all unique symptoms
+        const allSymptoms = new Set();
+        Object.values(hormoneImbalances).forEach(symptoms => {
+            symptoms.forEach(symptom => allSymptoms.add(symptom));
+        });
+
+        // Create symptom checkboxes
+        allSymptoms.forEach(symptom => {
+            const div = document.createElement('div');
+            div.className = 'symptom-item';
+            div.textContent = symptom;
+            div.onclick = () => {
+                div.classList.toggle('selected');
+                checkHormoneImbalances();
+            };
+            symptomList.appendChild(div);
+        });
+
+        function checkHormoneImbalances() {
+            const selectedSymptoms = Array.from(document.querySelectorAll('.symptom-item.selected')).map(item => item.textContent);
+            const potentialImbalances = [];
+
+            for (const [imbalance, symptoms] of Object.entries(hormoneImbalances)) {
+                const matchingSymptoms = symptoms.filter(symptom => selectedSymptoms.includes(symptom));
+                if (matchingSymptoms.length > 0) {
+                    potentialImbalances.push({
+                        imbalance,
+                        matchCount: matchingSymptoms.length,
+                        totalSymptoms: symptoms.length
+                    });
+                }
+            }
+
+            potentialImbalances.sort((a, b) => b.matchCount - a.matchCount);
+
+            let resultHTML = '<h2>Potential Hormone Imbalances:</h2>';
+            if (potentialImbalances.length === 0) {
+                resultHTML += '<p>No specific hormone imbalances detected based on the selected symptoms.</p>';
+            } else {
+                resultHTML += '<ul>';
+                potentialImbalances.forEach(({ imbalance, matchCount, totalSymptoms }) => {
+                    const percentage = Math.round((matchCount / totalSymptoms) * 100);
+                    resultHTML += `<li>${imbalance} (${matchCount}/${totalSymptoms} symptoms, ${percentage}% match)</li>`;
+                });
+                resultHTML += '</ul>';
+            }
+            resultHTML += '<p>Note: This is a simple symptom checker and should not be considered as a medical diagnosis. Please consult with a healthcare professional for accurate diagnosis and treatment.</p>';
+
+            results.innerHTML = resultHTML;
+        }
+    </script>
+</body>
+</html>
